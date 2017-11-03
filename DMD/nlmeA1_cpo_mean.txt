@@ -1,0 +1,72 @@
+model{
+
+for (i in 1:nrec){
+		y[i]~dnorm(mu.y[i],tau.y)
+		mu.y[i]<-A*pnorm(age[i],mu[id[i]],sigmasq.i[id[i]])}
+for (i in 1:nsub) {
+    mu[i]~dnorm(mu0[group[i]],tau.mu[group[i]])
+    sigmasq.i[i]~dgamma(nu,nu/sigmasq0.i)
+	group[i]~dcat(p[])		
+	for (l in 1:K) {	gind[i,l]<-equals(l,group[i])	}
+}
+p[1]<-v[1]
+for (l in 2:K) {	
+	p[l] <- v[l]*(1-v[l-1])*p[l-1]/v[l-1]
+	v[l-1] ~ dbeta(1,alpha)T(,0.99)
+}
+v[K] <- 1
+
+  for (l in 1:K) {	
+    mu0[l]~dnorm(mu00,tau.mu00)
+    tau.mu[l]~dgamma(s1,s1/tau.mu0)
+  }
+
+	munew~dnorm(mu0[groupnew],tau.mu[groupnew])
+	sigmasqnew.i~dgamma(nu,nu/sigmasq0.i)
+	groupnew~dcat(p[])		
+
+for (i in 1:nobs) {
+ mu.ynew[i]<-A*pnorm(agenew[i],munew,sigmasqnew.i)
+ ypdf[i]<-log(1/sqrt(2*3.14)*sqrt(tau.y))-1/2*tau.y*pow((ynew[i]-mu.ynew[i]),2)
+}
+
+ynewlogli<-sum(ypdf)
+
+
+
+
+############## prior
+  tau.y~dgamma(1.0E-3, 1.0E-3)
+  sigmasq.y<-1/tau.y
+  
+  A~dgamma(1,1)
+  
+  alpha~dgamma(1,1)
+  
+ 
+  
+  sigmasq0.i~dgamma(0.01,0.01)
+  sigmasq0<-1/sigmasq0.i
+  nu~dgamma(0.01,0.01)
+  
+
+  mu00~dnorm(16,0.1)
+  tau.mu00~dgamma(10,10/0.09)
+  tau.mu0~dgamma(10,10/0.09)
+  s1<-1/s1a+2
+  s1a~dgamma(1,1)
+
+  
+  
+  
+  
+#  mu00~dnorm(15,3)
+#  tau.mu00<-3
+#  a1<-33
+#  b1<-382
+#  a2<-32
+#  b2<-20
+#  a3<-69
+#  b3<-1184
+
+}

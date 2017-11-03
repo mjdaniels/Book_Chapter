@@ -1,0 +1,56 @@
+model{
+
+for (i in 1:n){
+	for (t in 1:T) {
+		y[i,t]~dnorm(mu.y[i,t],tau.y)
+		mu.y[i,t]<-A*pnorm(age[i,t],mu[i],sigmasq.i[i])
+	}
+	mu[i]~dnorm(mu0,tau.mu)
+	sigmasq.i[i]~dgamma(nu,nu*sigmasq0)
+	sigmasq[i]<-1/sigmasq.i[i]
+}
+
+
+############## prior
+tau.y~dgamma(1.0E-3, 1.0E-3)
+A~dgamma(1,1)
+mu0~dnorm(0,0.01)
+tau.mu~dgamma(0.01,0.01)
+sigmasq0.i~dgamma(0.01,0.01)
+sigmasq0<-1/sigmasq0.i
+nu~dgamma(0.01,0.01)
+
+for (t in 1:50) {
+mu.fit[1,t]<-A*pnorm(agegrid[t],mu[1],sigmasq.i[1])
+mu.fit[2,t]<-A*pnorm(agegrid[t],mu[16],sigmasq.i[16])
+mu.fit[3,t]<-A*pnorm(agegrid[t],mu[3],sigmasq.i[3])
+mu.fit[4,t]<-A*pnorm(agegrid[t],mu[7],sigmasq.i[7])
+mu.fit[5,t]<-A*pnorm(agegrid[t],mu[2],sigmasq.i[2])
+mu.fit[6,t]<-A*pnorm(agegrid[t],mu[4],sigmasq.i[4])
+mu.fit[7,t]<-A*pnorm(agegrid[t],mu[8],sigmasq.i[8])
+mu.fit[8,t]<-A*pnorm(agegrid[t],mu[9],sigmasq.i[9])
+}
+
+for (i in 1:10) {
+ for (j in 1:50) {
+ mu.ypred[i,j]<-A*pnorm(agegrid[j],mu[i],sigmasq.i[i])
+ }
+}
+
+  for (j in 1:50) {
+    mupop.y[1,j]<-0}
+
+ 
+ for (i in 1:1000) {
+ mupred[i]~dnorm(mu0,tau.mu)
+ sigmasqpred.i[i]~dgamma(nu,nu*sigmasq0)
+  for (j in 1:50) {
+ muypred[i,j]<-A*pnorm(agegrid[j],mupred[i],sigmasqpred.i[i])
+ mupop.y[i+1,j]<-(mupop.y[i,j]*(i-1)+muypred[i,j])/i}
+ }
+ 
+ for (j in 1:50) {
+ mupop[j]<-mupop.y[1001,j]
+}
+
+}
